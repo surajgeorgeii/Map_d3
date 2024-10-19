@@ -10,7 +10,7 @@
 <body>
     <div id="slider-container">
         <label for="town-count">Select Number of Towns to Show: </label>
-        <input type="range" id="slider" min="1" max="500" value="20" oninput="updateTownCount()" />
+        <input type="range" id="slider" min="0" max="500" value="20" oninput="updateTownCount()" />
         <span id="town-count">20</span>
         <button onclick="loadMapData()" class="button">Reload Data</button>
     </div>

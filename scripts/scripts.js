@@ -80,6 +80,11 @@ function updateMap(townData) {
             this.closePopup();
         });
 
+        // Zoom in on click
+        marker.on('click', function () {
+            map.setView([town.lat, town.lng], 16); // Zoom in to level 10 (you can adjust this level)
+        });
+
         // Setting popup content separately
         marker.bindPopup(`
             <div><strong>Town:</strong> <a href="https://en.wikipedia.org/wiki/${town.Town}" target="_blank">${town.Town}</a></div>

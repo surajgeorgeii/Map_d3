@@ -27,7 +27,6 @@ function initializeMap() {
         "Open Topo Map": L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data &copy; <a href="https://opentopomap.org">OpenTopoMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>'
         }),
-        
     };
     L.control.layers(baseLayers).addTo(map);
     markerGroup.addTo(map);
@@ -36,8 +35,17 @@ function initializeMap() {
     loadMapData();
 }
 
-function loadMapData() { 
+function loadMapData() {
     const numTowns = document.getElementById("slider").value;
+
+    // Handle case when the number of towns is 0
+    if (numTowns === "0") {
+        markerGroup.clearLayers(); // Clear the map markers
+        alert('No towns to display'); // Optionally, show an alert
+        return; // Exit the function early
+    }
+
+    // If the number of towns is greater than 0, fetch and display the data
     if (numTowns > 0) {
         fetch(`http://34.147.162.172/Circles//Towns/${numTowns}`)
             .then(response => response.ok ? response.json() : Promise.reject('Load failed: ' + response.statusText))

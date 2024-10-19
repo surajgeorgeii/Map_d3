@@ -3,6 +3,7 @@ let tooltip;
 let populationScale;
 let markerGroup = L.layerGroup();
 let townData = [];
+let popupTimeout;  // Timeout variable to manage popup delay
 
 document.addEventListener("DOMContentLoaded", initializeMap);
 
@@ -66,31 +67,69 @@ function updateMap(townData) {
     markerGroup.clearLayers();
     townData.forEach(town => {
         const radius = populationScale(Number(town.Population));
-        const marker = L.circleMarker([town.lat, town.lng], {
+
+        // Create the circle marker
+        const circleMarker = L.circleMarker([town.lat, town.lng], {
             color: "#FF4500",
             weight: 1,
-            fillOpacity: 0.8,
+            fillOpacity: 0.5,
             radius: radius
         }).addTo(markerGroup);
-        
-        // Manually open and close the popup on hover
-        marker.on('mouseover', function () {
-            this.openPopup();
-        }).on('mouseout', function () {
-            this.closePopup();
-        });
 
-        // Zoom in on click
-        marker.on('click', function () {
-            map.setView([town.lat, town.lng], 16); // Zoom in to level 10 (you can adjust this level)
-        });
-
-        // Setting popup content separately
-        marker.bindPopup(`
+        // Set up the popup content
+        const popupContent = `
             <div><strong>Town:</strong> <a href="https://en.wikipedia.org/wiki/${town.Town}" target="_blank">${town.Town}</a></div>
             <div><strong>County:</strong> ${town.County}</div>
             <div><strong>Population:</strong> ${town.Population}</div>
-        `);
+        `;
+
+        // Bind the popup to the circle marker
+        circleMarker.bindPopup(popupContent);
+
+        // Handle mouseover event on the circle marker to open the popup
+        circleMarker.on('mouseover', function () {
+            clearTimeout(popupTimeout); // Clear any existing timeout to prevent premature closing
+            this.openPopup();
+        });
+
+        // Handle mouseout event to keep the popup open for 2 seconds
+        circleMarker.on('mouseout', function () {
+            popupTimeout = setTimeout(() => {
+                this.closePopup();  // Close popup after delay
+            }, 2000);  // Keep the popup open for 2 seconds
+        });
+
+        // Handle click event on the circle marker for zoom and show popup
+        circleMarker.on('click', function () {
+            map.flyTo([town.lat, town.lng], 13, {
+                animate: true,
+                duration: 1.5  // Smoother transition with increased duration
+            });
+
+            // Show popup after zoom is complete (delay for smoother transition)
+            setTimeout(() => {
+                this.openPopup();
+            }, 1500); // Delay matches the flyTo duration
+        });
+    });
+
+    // Listen for map zoomstart and zoomend events
+    map.on('zoomstart', function () {
+        // Reduce fill opacity during zoom to make circles fade
+        markerGroup.eachLayer(layer => {
+            if (layer instanceof L.CircleMarker) {
+                layer.setStyle({ fillOpacity: 0.1 });
+            }
+        });
+    });
+
+    map.on('zoomend', function () {
+        // Restore fill opacity after zooming is complete
+        markerGroup.eachLayer(layer => {
+            if (layer instanceof L.CircleMarker) {
+                layer.setStyle({ fillOpacity: 0.5 });
+            }
+        });
     });
 }
 

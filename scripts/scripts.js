@@ -36,9 +36,6 @@ function initializeMap() {
     loadMapData();
 }
 
-
-
-
 function loadMapData() { 
     const numTowns = document.getElementById("slider").value;
     if (numTowns > 0) {
@@ -66,19 +63,21 @@ function updateMap(townData) {
             weight: 1,
             fillOpacity: 0.8,
             radius: radius
-        }).bindPopup(`
+        }).addTo(markerGroup);
+        
+        // Manually open and close the popup on hover
+        marker.on('mouseover', function () {
+            this.openPopup();
+        }).on('mouseout', function () {
+            this.closePopup();
+        });
+
+        // Setting popup content separately
+        marker.bindPopup(`
             <div><strong>Town:</strong> <a href="https://en.wikipedia.org/wiki/${town.Town}" target="_blank">${town.Town}</a></div>
             <div><strong>County:</strong> ${town.County}</div>
             <div><strong>Population:</strong> ${town.Population}</div>
-        `).addTo(markerGroup);
-        marker.on('mouseover', function () {
-            tooltip.transition().duration(200).style("opacity", 0.9);
-            tooltip.html(`<strong>Town:</strong> ${town.Town}<br><strong>Population:</strong> ${town.Population}`).style("left", (d3.event.pageX + 5) + "px").style("top", (d3.event.pageY - 28) + "px");
-        }).on('mouseout', function () {
-            tooltip.transition().duration(500).style("opacity", 0);
-        }).on('add', function () {
-            this._path.classList.add('fade-in');
-        });
+        `);
     });
 }
 
